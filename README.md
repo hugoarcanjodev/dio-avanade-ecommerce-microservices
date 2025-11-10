@@ -31,49 +31,20 @@ Este projeto é configurado para ser executado sem problemas no GitHub Codespace
 
 ## Rodando o Projeto Localmente (Docker Compose)
 
-Certifique-se de ter o Docker e Docker Compose instalados em sua máquina.
-
-1.  **Navegue até o diretório raiz do projeto**:
-    ```bash
-    cd <diretorio-do-projeto>
-    ```
-2.  **Construa e inicie todos os serviços**:
-    ```bash
-    docker-compose up --build -d
-    ```
-    Isso irá construir as imagens Docker para cada microsserviço e iniciá-los juntamente com o RabbitMQ e os bancos de dados SQL Server.
-3.  **Verificar o status**:
-    ```bash
-    docker-compose ps
-    ```
 
 ## Acesso aos Serviços
 
-Após a inicialização, os serviços estarão disponíveis nas seguintes portas (padrão, pode variar dependendo da configuração do Codespaces ou local):
-
--   **API Gateway**: `http://localhost:8000` (ou a porta exposta pelo Codespaces)
--   **RabbitMQ Management**: `http://localhost:15672` (Usuário: `guest`, Senha: `guest`)
 
 ## Microsserviços
 
 ### EstoqueService
 
--   **API Base**: Acessível via API Gateway em `/estoque/...`
--   **Funcionalidades**:
-    -   Adicionar e consultar produtos.
-    -   Atualizar quantidade em estoque.
-    -   Consumir eventos de venda para decrementar estoque.
 
 ### VendasService
 
--   **API Base**: Acessível via API Gateway em `/vendas/...`
--   **Funcionalidades**:
-    -   Criar e consultar pedidos.
-    -   Publicar eventos de venda para o EstoqueService.
 
 ### PrecoService
 
--   (Será implementado em futuras iterações)
 
 ## Próximos Passos (Desenvolvimento)
 

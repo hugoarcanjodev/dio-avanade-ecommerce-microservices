@@ -1,0 +1,87 @@
+# Arquivos e pastas do .NET
+## Build
+[Dd]ebug/
+[Rr]elease/
+bin/
+obj/
+*.csproj.user
+*.resharper
+*.vspscc
+*.vssscc
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.bak
+*.vsp
+*.epp
+*.webinfo
+*.builds
+*.log
+*.sqlite
+*.sql
+
+# NuGet
+*.nupkg
+*.snupkg
+*.lock.json
+project.lock.json
+packages/
+.nuget/
+build/
+**/*.pdb
+
+# Testes
+TestResults/
+.vs/
+.history/
+
+# Git
+.gitattributes
+.gitkeep
+
+# Docker
+*.dockerignore
+*.env
+docker-compose.override.yml # Opcional: para configurações locais que não devem ir para o repo
+
+# Codespaces / VS Code
+.vscode/
+.vscode-server/
+.devcontainer/*.log # Logs específicos do devcontainer
+.devcontainer/*.pid # Process IDs
+
+# Visual Studio
+.vs/                  # Pasta oculta do Visual Studio
+*.opensdf
+*.sdf
+*.dbmdl
+*.mdf
+*.ldf
+
+# JetBrains
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Mac
+.DS_Store
+*.swp
+
+# Linux
+*~
+#*#
+#.fuse_hidden*
+.directory
+
+# NPM (se você adicionar um frontend em JS/TS)
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-store/
+
+# Banco de Dados (arquivos de dados locais, se não estiverem no Docker Volume)
+*.mdf
+*.ldf
+*.db
