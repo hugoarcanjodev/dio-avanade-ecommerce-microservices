@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Bancos de dados para os microsserviços
+  sqlserver-estoque:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Password" # Mude para uma senha forte em produção
+    ports:
+      - "1433:1433" # Porta padrão do SQL Server, será mapeada para uma porta dinâmica no Codespaces
+    volumes:
+      - sqlserver_estoque_data:/var/opt/mssql # Persistência dos dados
+
+  sqlserver-vendas:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Password" # Mude para uma senha forte em produção
+    ports:
+      - "1434:1433" # Mapeando para uma porta diferente para não conflitar com sqlserver-estoque
+    volumes:
+      - sqlserver_vendas_data:/var/opt/mssql # Persistência dos dados
+
+  sqlserver-preco:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Password" # Mude para uma senha forte em produção
+    ports:
+      - "1435:1433" # Mapeando para uma porta diferente
+    volumes:
+      - sqlserver_preco_data:/var/opt/mssql # Persistência dos dados
+
+  # Microsserviço de Estoque
+  estoque-service:
+    build:
+      context: ./src/EstoqueService
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Porta interna do contêiner para o serviço HTTP
+    environment:
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings:SQLServer: "Server=sqlserver-estoque;Database=EstoqueDB;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
+      RabbitMQ:Host: "rabbitmq"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver-estoque:
+        condition: service_started
+
+  # Microsserviço de Vendas
+  vendas-service:
+    build:
+      context: ./src/VendasService
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081" # Porta interna do contêiner para o serviço HTTP
+    environment:
+      ASPNETCORE_URLS: "http://+:8081"
+      ConnectionStrings:SQLServer: "Server=sqlserver-vendas;Database=VendasDB;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
+      RabbitMQ:Host: "rabbitmq"
+      EstoqueService:Url: "http://estoque-service:8080" # URL interna para comunicação com o EstoqueService
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver-vendas:
+        condition: service_started
+      estoque-service:
+        condition: service_started
+
+  # Microsserviço de Preço (inicialmente sem lógica, apenas o esqueleto)
+  preco-service:
+    build:
+      context: ./src/PrecoService
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      ASPNETCORE_URLS: "http://+:8082"
+      ConnectionStrings:SQLServer: "Server=sqlserver-preco;Database=PrecoDB;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True"
+      RabbitMQ:Host: "rabbitmq"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver-preco:
+        condition: service_started
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./src/ApiGateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80" # Porta para acesso externo
+    environment:
+      ASPNETCORE_URLS: "http://+:80"
+    depends_on:
+      estoque-service:
+        condition: service_started
+      vendas-service:
+        condition: service_started
+      preco-service:
+        condition: service_started
+
+volumes:
+  sqlserver_estoque_data:
+  sqlserver_vendas_data:
+  sqlserver_preco_data:

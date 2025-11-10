@@ -1,0 +1,18 @@
+{
+	"name": "E-commerce Microsserviços",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "api-gateway", // Define qual serviço do docker-compose será o principal no Codespaces
+	"workspaceFolder": "/workspaces/ecommerce-microservices",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-azuretools.vscode-docker"
+			]
+		}
+	},
+	"forwardPorts": [8000, 15672, 8080, 8081, 8082], // API Gateway, RabbitMQ Management, e portas dos microsserviços
+	"postCreateCommand": "dotnet restore && dotnet build", // Comandos executados após a criação do ambiente
+	"remoteUser": "vscode"
+}
